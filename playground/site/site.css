@@ -11,10 +11,21 @@ nav ul {
   list-style: none;
   padding: 0;
 }
-button {
+button,
+.fake-button {
   font: inherit;
   padding: 0.5rem 1rem;
 }
+.fake-button {
+  display: inline-block;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background: #eee;
+  color: #111;
+  cursor: pointer;
+}
+
+/* Disclosures */
 .disclosure {
   border: 1px solid #888;
   border-radius: 4px;
@@ -24,6 +35,8 @@ button {
 .disclosure button {
   padding: 0.25rem 0.5rem;
 }
+
+/* Dialogs */
 dialog {
   max-width: 24rem;
   border: 1px solid #555;
@@ -41,6 +54,60 @@ dialog h2 {
   gap: 0.5rem;
   margin-top: 1rem;
 }
+
+/* Products */
+.products {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+.product {
+  border: 1px solid #888;
+  border-radius: 6px;
+  padding: 1rem;
+}
+.product h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.2rem;
+}
+.product p {
+  margin: 0 0 0.75rem;
+}
+
+/* Forms */
+form {
+  border: 1px solid #888;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+}
+form h3 {
+  margin-top: 0;
+}
+.field {
+  margin: 0 0 1rem;
+}
+label {
+  display: block;
+  font-weight: 600;
+}
+input,
+textarea {
+  font: inherit;
+  padding: 0.4rem;
+  width: 100%;
+  max-width: 22rem;
+  box-sizing: border-box;
+}
+input[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border: 2px solid #b00020;
+}
+.error {
+  color: #b00020;
+  margin: 0.25rem 0 0;
+}
+
 footer {
   margin-top: 3rem;
   padding-top: 1rem;

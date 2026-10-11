@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 5: form errors</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      max-width: 40rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    form {
+      border: 1px solid #888;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0 2.5rem;
+    }
+    form h3 {
+      margin-top: 0;
+    }
+    .field {
+      margin: 0 0 1rem;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+    }
+    input,
+    textarea {
+      font: inherit;
+      padding: 0.4rem;
+      width: 100%;
+      max-width: 22rem;
+      box-sizing: border-box;
+    }
+    input[aria-invalid="true"],
+    textarea[aria-invalid="true"] {
+      border: 2px solid #b00020;
+    }
+    .error {
+      color: #b00020;
+      margin: 0.25rem 0 0;
+    }
+    button {
+      font: inherit;
+      padding: 0.5rem 1rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Example 5: form errors</h1>
+    <p>This page contains three forms. Submit any of them empty, and each field shows an error message. When that happens, each field should:</p>
+    <ul>
+      <li>have <code>aria-invalid="true"</code>, and</li>
+      <li>include its error message in its accessible description, using <code>aria-describedby</code>.</li>
+    </ul>
+    <p>Each error message's <code>id</code> is the field's <code>id</code> plus <code>-error</code>. Two forms work correctly. One is deliberately broken.</p>
+
+    <h2>Working forms</h2>
+
+    <!-- Working form 1 -->
+    <form novalidate aria-labelledby="contact-title">
+      <h3 id="contact-title">Contact us</h3>
+
+      <div class="field">
+        <label for="contact-name">Name</label>
+        <input type="text" id="contact-name" required aria-describedby="contact-name-error">
+        <p class="error" id="contact-name-error" hidden>Enter your name</p>
+      </div>
+
+      <div class="field">
+        <label for="contact-email">Email</label>
+        <input type="email" id="contact-email" required aria-describedby="contact-email-error">
+        <p class="error" id="contact-email-error" hidden>Enter your email address</p>
+      </div>
+
+      <div class="field">
+        <label for="contact-message">Message</label>
+        <textarea id="contact-message" rows="4" required aria-describedby="contact-message-error"></textarea>
+        <p class="error" id="contact-message-error" hidden>Enter a message</p>
+      </div>
+
+      <button type="submit">Send message</button>
+    </form>
+
+    <!-- Working form 2 -->
+    <form novalidate aria-labelledby="newsletter-title">
+      <h3 id="newsletter-title">Newsletter</h3>
+
+      <div class="field">
+        <label for="newsletter-email">Email</label>
+        <input type="email" id="newsletter-email" required aria-describedby="newsletter-email-error">
+        <p class="error" id="newsletter-email-error" hidden>Enter your email address</p>
+      </div>
+
+      <button type="submit">Subscribe</button>
+    </form>
+
+    <h2>Deliberately broken</h2>
+    <p>This form has two different faults, one on each field:</p>
+    <ul>
+      <li><strong>Name:</strong> the error appears and is linked to the field, but <code>aria-invalid</code> is never set.</li>
+      <li><strong>Phone:</strong> <code>aria-invalid</code> is set, but the error message isn't linked to the field. There's no <code>aria-describedby</code>.</li>
+    </ul>
+
+    <!-- BROKEN form -->
+    <form novalidate aria-labelledby="booking-title">
+      <h3 id="booking-title">Book a call</h3>
+
+      <div class="field">
+        <label for="booking-name">Name</label>
+        <!-- BROKEN: aria-invalid is never set on this field (see data-broken) -->
+        <input type="text" id="booking-name" required aria-describedby="booking-name-error" data-broken>
+        <p class="error" id="booking-name-error" hidden>Enter your name</p>
+      </div>
+
+      <div class="field">
+        <label for="booking-phone">Phone</label>
+        <!-- BROKEN: no aria-describedby, so the error isn't linked -->
+        <input type="tel" id="booking-phone" required>
+        <p class="error" id="booking-phone-error" hidden>Enter your phone number</p>
+      </div>
+
+      <button type="submit">Book call</button>
+    </form>
+  </main>
+
+  <script>
+    document.querySelectorAll('form').forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        var firstInvalid = null;
+
+        form.querySelectorAll('[required]').forEach(function (field) {
+          var error = document.getElementById(field.id + '-error');
+          var isEmpty = field.value.trim() === '';
+
+          // Show or hide the error message
+          error.hidden = !isEmpty;
+
+          // BROKEN: fields marked data-broken never get aria-invalid
+          if (!field.hasAttribute('data-broken')) {
+            if (isEmpty) {
+              field.setAttribute('aria-invalid', 'true');
+            } else {
+              field.removeAttribute('aria-invalid');
+            }
+          }
+
+          if (isEmpty && !firstInvalid) {
+            firstInvalid = field;
+          }
+        });
+
+        // Move focus to the first field with an error
+        if (firstInvalid) {
+          firstInvalid.focus();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

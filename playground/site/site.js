@@ -38,3 +38,48 @@ document.querySelectorAll('dialog[data-broken]').forEach(function (dialog) {
     document.activeElement.blur();
   });
 });
+
+// ---------- Add to cart ----------
+document.querySelectorAll('.add-to-cart').forEach(function (control) {
+  control.addEventListener('click', function () {
+    var message = document.getElementById('cart-message');
+    if (message) {
+      message.textContent = control.textContent.replace('Add ', '').replace(' to cart', '') + ' added to your cart.';
+    }
+  });
+});
+
+// ---------- Forms ----------
+document.querySelectorAll('form').forEach(function (form) {
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    var firstInvalid = null;
+
+    form.querySelectorAll('[required]').forEach(function (field) {
+      var error = document.getElementById(field.id + '-error');
+      var isEmpty = field.value.trim() === '';
+
+      // Show or hide the error message
+      error.hidden = !isEmpty;
+
+      // BROKEN: fields marked data-broken never get aria-invalid
+      if (!field.hasAttribute('data-broken')) {
+        if (isEmpty) {
+          field.setAttribute('aria-invalid', 'true');
+        } else {
+          field.removeAttribute('aria-invalid');
+        }
+      }
+
+      if (isEmpty && !firstInvalid) {
+        firstInvalid = field;
+      }
+    });
+
+    // Move focus to the first field with an error
+    if (firstInvalid) {
+      firstInvalid.focus();
+    }
+  });
+});

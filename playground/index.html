@@ -42,30 +42,30 @@
 
     <h2>Examples</h2>
 
-    <ol start="0">
+    <ol>
       <li>
-        <a href="buttons.html">Warm-up: buttons and accessible names</a>
+        <a href="buttons.html">Example 1: buttons and accessible names</a>
         <p>An icon-only button with no accessible name. Test: <code>buttons.spec.js</code></p>
       </li>
       <li>
-        <a href="disclosures.html">Example 1: disclosures</a>
+        <a href="disclosures.html">Example 2: disclosures</a>
         <p>A disclosure that shows and hides its content, but never updates <code>aria-expanded</code>. Test: <code>disclosures.spec.js</code></p>
       </li>
       <li>
-        <a href="keyboard.html">Example 2: keyboard reachability</a>
+        <a href="keyboard.html">Example 3: keyboard reachability</a>
         <p>A control with <code>role="button"</code> that can't be reached with the Tab key. Test: <code>keyboard.spec.js</code></p>
       </li>
       <li>
-        <a href="dialogs.html">Example 3: dialogs</a>
+        <a href="dialogs.html">Example 4: dialogs</a>
         <p>A dialog that drops focus completely when it closes. Test: <code>dialogs.spec.js</code></p>
       </li>
       <li>
-        <a href="tabs.html">Example 4: tabs</a>
-        <p>A tab set that ignores the arrow keys. Test: <code>tabs.spec.js</code></p>
+        <a href="forms.html">Example 5: form errors</a>
+        <p>A form where one field never gets <code>aria-invalid="true"</code>, and another's error message isn't linked to the field. Test: <code>forms.spec.js</code></p>
       </li>
       <li>
-        <a href="site/home.html">Example 5: a small website</a>
-        <p>Three pages sharing the same components, with a broken disclosure on one page and a broken dialog on another. Test: <code>site.spec.js</code></p>
+        <a href="site/index.html">Example 6: a small website</a>
+        <p>Three pages, each reusing checks from earlier examples: disclosures and dialogs on the home page, a product list with a button that can't be reached by keyboard, and a help page with a broken form. Test: <code>site.spec.js</code></p>
       </li>
     </ol>
   </main>

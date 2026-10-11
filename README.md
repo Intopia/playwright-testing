@@ -2,7 +2,7 @@
 
 Test pages and Playwright tests for the article [Accessibility testing with Playwright: what axe-core can't see](#).
 
-The article shows what Playwright can check that axe-core can't: changing states, keyboard use, focus movement, related states staying in sync, and running the same checks across a whole site.
+The article shows what Playwright can check that axe-core can't: changing states, keyboard use, focus movement, form errors that only appear after submitting, and running the same checks across a whole site.
 
 Each test page contains working components and at least one deliberately broken one. Run the matching test, and you should see it pass for the working components and fail for the broken one, for exactly the reason it should.
 
@@ -12,9 +12,9 @@ You can browse the pages online at the [playground site](https://intopia.github.
 
 ```
 playground/        The test pages
-  site/            A small three-page website (example 5)
+  site/            A small three-page website (example 6)
 tests/             The Playwright tests, one per page
-  helpers/         Reusable checks used in example 5
+  helpers/         Reusable checks used in example 6
 playwright.config.js
 ```
 
@@ -22,12 +22,14 @@ playwright.config.js
 
 | Example | Page | Test | What's deliberately broken |
 | --- | --- | --- | --- |
-| Warm-up | `buttons.html` | `buttons.spec.js` | An icon-only button with no accessible name |
-| 1 | `disclosures.html` | `disclosures.spec.js` | A disclosure that never updates `aria-expanded` |
-| 2 | `keyboard.html` | `keyboard.spec.js` | A `role="button"` control that can't be reached with Tab |
-| 3 | `dialogs.html` | `dialogs.spec.js` | A dialog that drops focus when it closes |
-| 4 | `tabs.html` | `tabs.spec.js` | A tab set that ignores the arrow keys |
-| 5 | `site/` | `site.spec.js` | A broken disclosure on Products, a broken dialog on Help |
+| 1 | `buttons.html` | `buttons.spec.js` | An icon-only button with no accessible name |
+| 2 | `disclosures.html` | `disclosures.spec.js` | A disclosure that never updates `aria-expanded` |
+| 3 | `keyboard.html` | `keyboard.spec.js` | A `role="button"` control that can't be reached with Tab |
+| 4 | `dialogs.html` | `dialogs.spec.js` | A dialog that drops focus when it closes |
+| 5 | `forms.html` | `forms.spec.js` | One field never gets `aria-invalid="true"`, and another's error message isn't linked to the field |
+| 6 | `site/` | `site.spec.js` | An "Add to cart" button on Products that can't be reached with Tab, and a field on Help that never gets `aria-invalid="true"` |
+
+Example 1 is a baseline. axe-core already checks for missing button names, and does it well. Every example after that checks something axe-core can't, because it only happens after someone interacts with the page.
 
 ## Getting started
 
@@ -76,15 +78,22 @@ npx playwright show-report
 
 ## What to expect
 
-**Every test should fail.** That's the point. Each one is designed to catch the deliberately broken component on its page, and only that component.
+**Every test should fail.** That's the point. Each one is designed to catch the deliberately broken components on its page, and only those components.
 
 A few things worth knowing:
 
-- **The keyboard test is skipped in WebKit.** Playwright's WebKit follows Safari's default setting on macOS, where Tab skips links. The skip reason appears in the report.
-- **The tabs test reports six failures.** There's only one bug, but it causes several checks to fail.
+- **Keyboard tests are skipped in WebKit.** Playwright's WebKit follows Safari's default setting on macOS, where Tab skips links. The skip reason appears in the report. This applies to example 3, and to the keyboard tests in example 6.
+- **The forms test reports two failures.** One for each broken field, and each field fails a different check.
+- **The site test runs 36 tests.** That's three pages, four checks each, in three browsers. Most pass. The failures point to the two broken components.
 - **Failing tests are slow.** Each failing check waits up to 5 seconds in case the page is still updating.
 
-To see a test pass, fix the broken component in its page, then run the test again.
+## Breaking and fixing things
+
+The tests in this repo open the local copies of the pages in the `playground` folder, so you can edit a page and rerun its test. (The article's code samples point at the published pages instead, so you can run them without cloning anything.)
+
+To see a test pass, fix the broken component in its page, then run the test again. Each page has a "Deliberately broken" section or a playground note explaining what's wrong.
+
+It's also worth trying the reverse: break a working component, and check the test catches it. That's how you know a test is really checking what you think it is.
 
 ## Please note
 
