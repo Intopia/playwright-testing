@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home - Trailhead Outdoor Gear</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header>
+    <nav aria-label="Site">
+      <ul>
+        <li><a href="home.html" aria-current="page">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="help.html">Help</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Trailhead Outdoor Gear</h1>
+    <p>Quality gear for weekend walkers and serious hikers.</p>
+
+    <h2>About us</h2>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="home-story">Our story</button>
+      <div id="home-story" hidden>
+        <p>We started as a small stall at a Blue Mountains market in 2012.</p>
+      </div>
+    </div>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="home-hours">Opening hours</button>
+      <div id="home-hours" hidden>
+        <p>Monday to Saturday, 9am to 5pm.</p>
+      </div>
+    </div>
+
+    <h2>Stay in touch</h2>
+    <button type="button" aria-haspopup="dialog" data-opens="home-newsletter">Join our newsletter</button>
+  </main>
+
+  <footer>
+    <p>Playground note: everything on this page works correctly.</p>
+  </footer>
+
+  <dialog id="home-newsletter" aria-labelledby="home-newsletter-title">
+    <h2 id="home-newsletter-title" tabindex="-1" autofocus>Join our newsletter</h2>
+    <p>One email a month. No spam.</p>
+    <div class="actions">
+      <button type="button" data-close>Cancel</button>
+      <button type="button" data-close>Subscribe</button>
+    </div>
+  </dialog>
+
+  <script src="site.js"></script>
+</body>
+</html>

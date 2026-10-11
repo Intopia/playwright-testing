@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Products - Trailhead Outdoor Gear</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header>
+    <nav aria-label="Site">
+      <ul>
+        <li><a href="home.html">Home</a></li>
+        <li><a href="products.html" aria-current="page">Products</a></li>
+        <li><a href="help.html">Help</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Products</h1>
+
+    <h2>Summit daypack</h2>
+    <p>A lightweight, water-resistant 20 litre pack.</p>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="prod-specs">Specifications</button>
+      <div id="prod-specs" hidden>
+        <p>Weight: 600 grams. Colours: green, grey, orange.</p>
+      </div>
+    </div>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="prod-care">Care instructions</button>
+      <div id="prod-care" hidden>
+        <p>Hand wash in cold water. Air dry only.</p>
+      </div>
+    </div>
+
+    <!-- BROKEN: aria-expanded never updates -->
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="prod-warranty" data-broken>Warranty</button>
+      <div id="prod-warranty" hidden>
+        <p>Covered for five years against manufacturing faults.</p>
+      </div>
+    </div>
+
+    <button type="button" aria-haspopup="dialog" data-opens="prod-cart">Add to cart</button>
+  </main>
+
+  <footer>
+    <p>Playground note: the "Warranty" disclosure is deliberately broken. It shows and hides its content, but never updates <code>aria-expanded</code>.</p>
+  </footer>
+
+  <dialog id="prod-cart" aria-labelledby="prod-cart-title">
+    <h2 id="prod-cart-title" tabindex="-1" autofocus>Added to cart</h2>
+    <p>Summit daypack has been added to your cart.</p>
+    <div class="actions">
+      <button type="button" data-close>Keep shopping</button>
+      <button type="button" data-close>View cart</button>
+    </div>
+  </dialog>
+
+  <script src="site.js"></script>
+</body>
+</html>

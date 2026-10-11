@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 3: dialogs</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      max-width: 40rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    button {
+      font: inherit;
+      padding: 0.5rem 1rem;
+    }
+    .group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1rem 0 2rem;
+    }
+    dialog {
+      max-width: 24rem;
+      border: 1px solid #555;
+      border-radius: 6px;
+      padding: 1.5rem;
+    }
+    dialog::backdrop {
+      background: rgb(0 0 0 / 0.4);
+    }
+    dialog h2 {
+      margin-top: 0;
+    }
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    label {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Example 3: dialogs</h1>
+    <p>This page contains four dialogs. When each one opens, focus should move to the dialog's heading. When it closes with Escape, focus should return to the button that opened it. Three work correctly. One is deliberately broken.</p>
+
+    <h2>Working dialogs</h2>
+    <div class="group">
+      <button type="button" aria-haspopup="dialog" data-opens="dialog-delete">Delete file</button>
+      <button type="button" aria-haspopup="dialog" data-opens="dialog-rename">Rename file</button>
+      <button type="button" aria-haspopup="dialog" data-opens="dialog-share">Share file</button>
+    </div>
+
+    <h2>Deliberately broken</h2>
+    <p>This dialog opens correctly, but when it closes, focus is dropped completely. It falls back to the page itself, so keyboard users are left with no visible focus and no idea where they are.</p>
+    <div class="group">
+      <button type="button" aria-haspopup="dialog" data-opens="dialog-signout">Sign out</button>
+    </div>
+  </main>
+
+  <!-- Working dialog 1 -->
+  <dialog id="dialog-delete" aria-labelledby="dialog-delete-title">
+    <h2 id="dialog-delete-title" tabindex="-1" autofocus>Delete this file?</h2>
+    <p>This cannot be undone.</p>
+    <div class="actions">
+      <button type="button" data-close>Cancel</button>
+      <button type="button" data-close>Delete</button>
+    </div>
+  </dialog>
+
+  <!-- Working dialog 2 -->
+  <dialog id="dialog-rename" aria-labelledby="dialog-rename-title">
+    <h2 id="dialog-rename-title" tabindex="-1" autofocus>Rename file</h2>
+    <label for="filename">File name</label>
+    <input type="text" id="filename" value="report.pdf">
+    <div class="actions">
+      <button type="button" data-close>Cancel</button>
+      <button type="button" data-close>Save</button>
+    </div>
+  </dialog>
+
+  <!-- Working dialog 3 -->
+  <dialog id="dialog-share" aria-labelledby="dialog-share-title">
+    <h2 id="dialog-share-title" tabindex="-1" autofocus>Share file</h2>
+    <p>Anyone with the link can view this file.</p>
+    <div class="actions">
+      <button type="button" data-close>Copy link</button>
+      <button type="button" data-close>Close</button>
+    </div>
+  </dialog>
+
+  <!-- BROKEN dialog -->
+  <dialog id="dialog-signout" aria-labelledby="dialog-signout-title" data-broken>
+    <h2 id="dialog-signout-title" tabindex="-1" autofocus>Sign out?</h2>
+    <p>You will need to sign in again to continue.</p>
+    <div class="actions">
+      <button type="button" data-close>Cancel</button>
+      <button type="button" data-close>Sign out</button>
+    </div>
+  </dialog>
+
+  <script>
+    // Open the matching dialog when a trigger button is activated
+    document.querySelectorAll('[data-opens]').forEach(function (trigger) {
+      trigger.addEventListener('click', function () {
+        document.getElementById(trigger.dataset.opens).showModal();
+      });
+    });
+
+    // Close a dialog from any of its buttons
+    document.querySelectorAll('[data-close]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        button.closest('dialog').close();
+      });
+    });
+
+    // BROKEN: when this dialog closes (including with Escape),
+    // focus is dropped, so it falls back to the body of the page
+    document.getElementById('dialog-signout').addEventListener('close', function () {
+      document.activeElement.blur();
+    });
+  </script>
+</body>
+</html>

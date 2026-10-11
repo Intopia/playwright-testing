@@ -1,0 +1,49 @@
+body {
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  max-width: 40rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+nav ul {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+}
+button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+}
+.disclosure {
+  border: 1px solid #888;
+  border-radius: 4px;
+  margin: 0 0 1rem;
+  padding: 0.5rem 1rem;
+}
+.disclosure button {
+  padding: 0.25rem 0.5rem;
+}
+dialog {
+  max-width: 24rem;
+  border: 1px solid #555;
+  border-radius: 6px;
+  padding: 1.5rem;
+}
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+dialog h2 {
+  margin-top: 0;
+}
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+footer {
+  margin-top: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #888;
+  font-size: 0.9rem;
+}

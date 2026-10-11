@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Help - Trailhead Outdoor Gear</title>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body>
+  <header>
+    <nav aria-label="Site">
+      <ul>
+        <li><a href="home.html">Home</a></li>
+        <li><a href="products.html">Products</a></li>
+        <li><a href="help.html" aria-current="page">Help</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Help</h1>
+
+    <h2>Frequently asked questions</h2>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="help-delivery">How long does delivery take?</button>
+      <div id="help-delivery" hidden>
+        <p>Three to five business days within Australia.</p>
+      </div>
+    </div>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="help-returns">Can I return an item?</button>
+      <div id="help-returns" hidden>
+        <p>Yes, unused items can be returned within 30 days.</p>
+      </div>
+    </div>
+
+    <h2>Still need help?</h2>
+    <p>
+      <button type="button" aria-haspopup="dialog" data-opens="help-chat">Start a chat</button>
+      <button type="button" aria-haspopup="dialog" data-opens="help-contact">Contact support</button>
+    </p>
+  </main>
+
+  <footer>
+    <p>Playground note: the "Contact support" dialog is deliberately broken. When it closes, focus is dropped completely instead of returning to the button.</p>
+  </footer>
+
+  <dialog id="help-chat" aria-labelledby="help-chat-title">
+    <h2 id="help-chat-title" tabindex="-1" autofocus>Start a chat</h2>
+    <p>Our team is online Monday to Friday, 9am to 5pm.</p>
+    <div class="actions">
+      <button type="button" data-close>Cancel</button>
+      <button type="button" data-close>Start chat</button>
+    </div>
+  </dialog>
+
+  <!-- BROKEN: drops focus when closed -->
+  <dialog id="help-contact" aria-labelledby="help-contact-title" data-broken>
+    <h2 id="help-contact-title" tabindex="-1" autofocus>Contact support</h2>
+    <p>Email us at help@example.com and we'll reply within one business day.</p>
+    <div class="actions">
+      <button type="button" data-close>Close</button>
+    </div>
+  </dialog>
+
+  <script src="site.js"></script>
+</body>
+</html>

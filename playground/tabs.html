@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 4: tabs</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      max-width: 40rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .tabs {
+      margin: 1rem 0 2.5rem;
+    }
+    [role="tablist"] {
+      display: flex;
+      gap: 0.25rem;
+      border-bottom: 2px solid #555;
+    }
+    [role="tab"] {
+      font: inherit;
+      padding: 0.5rem 1rem;
+      border: 1px solid #555;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      background: #eee;
+      color: #111;
+      cursor: pointer;
+    }
+    [role="tab"][aria-selected="true"] {
+      background: #111;
+      color: #fff;
+    }
+    [role="tabpanel"] {
+      padding: 1rem;
+      border: 1px solid #555;
+      border-top: none;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Example 4: tabs</h1>
+    <p>This page contains three tab sets using automatic activation: the Left and Right arrow keys move focus between tabs and select them, showing the matching panel. Two work correctly. One is deliberately broken.</p>
+
+    <h2>Working tab sets</h2>
+
+    <!-- Working tab set 1 -->
+    <div class="tabs">
+      <div role="tablist" aria-label="Product details">
+        <button type="button" role="tab" id="t1-1" aria-controls="p1-1" aria-selected="true">Description</button>
+        <button type="button" role="tab" id="t1-2" aria-controls="p1-2" aria-selected="false" tabindex="-1">Specifications</button>
+        <button type="button" role="tab" id="t1-3" aria-controls="p1-3" aria-selected="false" tabindex="-1">Reviews</button>
+      </div>
+      <div role="tabpanel" id="p1-1" aria-labelledby="t1-1"><p>A lightweight, water-resistant daypack.</p></div>
+      <div role="tabpanel" id="p1-2" aria-labelledby="t1-2" hidden><p>Capacity: 20 litres. Weight: 600 grams.</p></div>
+      <div role="tabpanel" id="p1-3" aria-labelledby="t1-3" hidden><p>Rated 4.5 out of 5 by 120 customers.</p></div>
+    </div>
+
+    <!-- Working tab set 2 -->
+    <div class="tabs">
+      <div role="tablist" aria-label="Account settings">
+        <button type="button" role="tab" id="t2-1" aria-controls="p2-1" aria-selected="true">Profile</button>
+        <button type="button" role="tab" id="t2-2" aria-controls="p2-2" aria-selected="false" tabindex="-1">Security</button>
+        <button type="button" role="tab" id="t2-3" aria-controls="p2-3" aria-selected="false" tabindex="-1">Notifications</button>
+      </div>
+      <div role="tabpanel" id="p2-1" aria-labelledby="t2-1"><p>Update your name and photo.</p></div>
+      <div role="tabpanel" id="p2-2" aria-labelledby="t2-2" hidden><p>Change your password and sign-in options.</p></div>
+      <div role="tabpanel" id="p2-3" aria-labelledby="t2-3" hidden><p>Choose which emails you receive.</p></div>
+    </div>
+
+    <h2>Deliberately broken</h2>
+    <p>This tab set works with a mouse, but ignores the arrow keys. Keyboard users can reach the first tab, and are stuck there.</p>
+
+    <!-- BROKEN tab set: no arrow key support -->
+    <div class="tabs" data-broken>
+      <div role="tablist" aria-label="Shipping options">
+        <button type="button" role="tab" id="t3-1" aria-controls="p3-1" aria-selected="true">Domestic</button>
+        <button type="button" role="tab" id="t3-2" aria-controls="p3-2" aria-selected="false" tabindex="-1">International</button>
+        <button type="button" role="tab" id="t3-3" aria-controls="p3-3" aria-selected="false" tabindex="-1">Express</button>
+      </div>
+      <div role="tabpanel" id="p3-1" aria-labelledby="t3-1"><p>Free delivery within Australia on orders over $50.</p></div>
+      <div role="tabpanel" id="p3-2" aria-labelledby="t3-2" hidden><p>We ship to over 40 countries.</p></div>
+      <div role="tabpanel" id="p3-3" aria-labelledby="t3-3" hidden><p>Next-day delivery to most capital cities.</p></div>
+    </div>
+  </main>
+
+  <script>
+    document.querySelectorAll('[role="tablist"]').forEach(function (tablist) {
+      var tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+      var isBroken = tablist.closest('[data-broken]') !== null;
+
+      // Select a tab: update aria-selected, roving tabindex and panels
+      function selectTab(newTab) {
+        tabs.forEach(function (tab) {
+          var selected = tab === newTab;
+          tab.setAttribute('aria-selected', String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+          document.getElementById(tab.getAttribute('aria-controls')).hidden = !selected;
+        });
+      }
+
+      // Mouse (and Enter/Space on a focused tab) selects a tab
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          selectTab(tab);
+        });
+      });
+
+      // BROKEN: the broken tab set never gets arrow key support
+      if (isBroken) return;
+
+      // Arrow keys move focus and select (automatic activation)
+      tablist.addEventListener('keydown', function (event) {
+        var index = tabs.indexOf(document.activeElement);
+        var next = null;
+
+        if (event.key === 'ArrowRight') next = tabs[(index + 1) % tabs.length];
+        if (event.key === 'ArrowLeft') next = tabs[(index - 1 + tabs.length) % tabs.length];
+        if (event.key === 'Home') next = tabs[0];
+        if (event.key === 'End') next = tabs[tabs.length - 1];
+
+        if (next) {
+          event.preventDefault();
+          next.focus();
+          selectTab(next);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playwright accessibility testing playground</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      max-width: 40rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    ol {
+      padding-left: 1.25rem;
+    }
+    li {
+      margin-bottom: 1.25rem;
+    }
+    li p {
+      margin: 0.25rem 0 0;
+    }
+    code {
+      font-size: 0.95em;
+    }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid #888;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Playwright accessibility testing playground</h1>
+
+    <p>These pages support the article <a href="#">Accessibility testing with Playwright: what axe-core can't see</a>.</p>
+
+    <p>Each page contains working components and at least one deliberately broken one. Run the matching test against a page, and you should see it pass for the working components and fail for the broken one, for exactly the reason it should.</p>
+
+    <h2>Examples</h2>
+
+    <ol start="0">
+      <li>
+        <a href="buttons.html">Warm-up: buttons and accessible names</a>
+        <p>An icon-only button with no accessible name. Test: <code>buttons.spec.js</code></p>
+      </li>
+      <li>
+        <a href="disclosures.html">Example 1: disclosures</a>
+        <p>A disclosure that shows and hides its content, but never updates <code>aria-expanded</code>. Test: <code>disclosures.spec.js</code></p>
+      </li>
+      <li>
+        <a href="keyboard.html">Example 2: keyboard reachability</a>
+        <p>A control with <code>role="button"</code> that can't be reached with the Tab key. Test: <code>keyboard.spec.js</code></p>
+      </li>
+      <li>
+        <a href="dialogs.html">Example 3: dialogs</a>
+        <p>A dialog that drops focus completely when it closes. Test: <code>dialogs.spec.js</code></p>
+      </li>
+      <li>
+        <a href="tabs.html">Example 4: tabs</a>
+        <p>A tab set that ignores the arrow keys. Test: <code>tabs.spec.js</code></p>
+      </li>
+      <li>
+        <a href="site/home.html">Example 5: a small website</a>
+        <p>Three pages sharing the same components, with a broken disclosure on one page and a broken dialog on another. Test: <code>site.spec.js</code></p>
+      </li>
+    </ol>
+  </main>
+
+  <footer>
+    <p>The broken components are deliberate. Please don't copy them.</p>
+  </footer>
+</body>
+</html>

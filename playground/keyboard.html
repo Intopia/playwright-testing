@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 2: keyboard reachability</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      max-width: 40rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    nav ul {
+      display: flex;
+      gap: 1rem;
+      list-style: none;
+      padding: 0;
+    }
+    .field {
+      margin: 0 0 1rem;
+    }
+    label {
+      display: block;
+    }
+    input[type="checkbox"] + label {
+      display: inline;
+    }
+    button,
+    .fake-button {
+      font: inherit;
+      padding: 0.5rem 1rem;
+      border: 1px solid #555;
+      border-radius: 4px;
+      background: #eee;
+      color: #111;
+      cursor: pointer;
+      display: inline-block;
+    }
+    #message {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav aria-label="Main">
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Example 2: keyboard reachability</h1>
+    <p>This page contains several interactive controls. All but one can be reached with the Tab key.</p>
+
+    <h2>Working controls</h2>
+
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email">
+    </div>
+
+    <div class="field">
+      <label for="country">Country</label>
+      <select id="country">
+        <option>Australia</option>
+        <option>New Zealand</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <input type="checkbox" id="updates">
+      <label for="updates">Send me updates</label>
+    </div>
+
+    <div class="field">
+      <button type="button">Subscribe</button>
+    </div>
+
+    <h2>Deliberately broken</h2>
+    <p>This "button" is a <code>div</code> with <code>role="button"</code> and a click handler, but no <code>tabindex</code>. It has a role and a name, and works with a mouse, but keyboard users can never reach it.</p>
+
+    <div class="field">
+      <!-- BROKEN: role="button" but no tabindex, so it is not focusable -->
+      <div role="button" class="fake-button" id="download">Download brochure</div>
+    </div>
+
+    <p id="message" role="status"></p>
+  </main>
+
+  <script>
+    document.getElementById('download').addEventListener('click', function () {
+      document.getElementById('message').textContent = 'Brochure downloaded.';
+    });
+  </script>
+</body>
+</html>

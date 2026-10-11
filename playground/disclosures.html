@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example 1: disclosures</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      max-width: 40rem;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .disclosure {
+      border: 1px solid #888;
+      border-radius: 4px;
+      margin: 0 0 1rem;
+      padding: 0.5rem 1rem;
+    }
+    .disclosure button {
+      font: inherit;
+      padding: 0.25rem 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Example 1: disclosures</h1>
+    <p>This page contains four disclosures. Three work correctly. One is deliberately broken.</p>
+
+    <h2>Working disclosures</h2>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="panel-1">Delivery times</button>
+      <div id="panel-1" hidden>
+        <p>Orders usually arrive within three to five business days.</p>
+      </div>
+    </div>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="panel-2">Returns policy</button>
+      <div id="panel-2" hidden>
+        <p>You can return unused items within 30 days.</p>
+      </div>
+    </div>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="panel-3">Payment options</button>
+      <div id="panel-3" hidden>
+        <p>We accept card payments and bank transfers.</p>
+      </div>
+    </div>
+
+    <h2>Deliberately broken</h2>
+    <p>This disclosure shows and hides its content, but never updates <code>aria-expanded</code>. Visually it works. Programmatically it always reports "collapsed".</p>
+
+    <div class="disclosure">
+      <button type="button" aria-expanded="false" aria-controls="panel-4" data-broken>Gift wrapping</button>
+      <div id="panel-4" hidden>
+        <p>Gift wrapping is available at checkout.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.querySelectorAll('button[aria-controls]').forEach(function (button) {
+      var panel = document.getElementById(button.getAttribute('aria-controls'));
+
+      button.addEventListener('click', function () {
+        var isOpen = !panel.hidden;
+
+        // Show or hide the content
+        panel.hidden = isOpen;
+
+        // BROKEN: the data-broken disclosure skips this step
+        if (!button.hasAttribute('data-broken')) {
+          button.setAttribute('aria-expanded', String(!isOpen));
+        }
+      });
+    });
+  </script>
+</body>
+</html>
