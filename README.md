@@ -6,7 +6,7 @@ The article shows what Playwright can check that axe-core can't: changing states
 
 Each test page contains working components and at least one deliberately broken one. Run the matching test, and you should see it pass for the working components and fail for the broken one, for exactly the reason it should.
 
-You can browse the pages online at the [playground site](#).
+You can browse the pages online at the [playground site](https://intopia.github.io/playwright-testing/playground/).
 
 ## What's in this repo
 
