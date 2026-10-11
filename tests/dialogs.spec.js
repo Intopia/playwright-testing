@@ -1,17 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-// Where the playground page lives (inside your playwright-learning folder)
-const pageUrl = 'file://' + process.cwd() + '/playground/dialogs.html';
+// The playground page
+const pageUrl = 'https://intopia.github.io/playwright-testing/playground/dialogs.html';
 
 test('every dialog focuses its heading on open and returns focus on Escape', async ({ page }) => {
-  // Open the playground page
   await page.goto(pageUrl);
 
   // Find every button that opens a dialog
   const triggers = await page.locator('button[aria-haspopup="dialog"]').all();
 
   for (const trigger of triggers) {
-    // The button's visible text, so failures say which dialog it was
     const name = (await trigger.textContent()).trim();
 
     // OPEN: press Enter on the trigger button

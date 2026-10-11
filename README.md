@@ -87,13 +87,31 @@ A few things worth knowing:
 - **The site test runs 36 tests.** That's three pages, four checks each, in three browsers. Most pass. The failures point to the two broken components.
 - **Failing tests are slow.** Each failing check waits up to 5 seconds in case the page is still updating.
 
+## Where the tests point
+
+The test files run on your computer, but the pages they test are the published ones on the [playground site](https://intopia.github.io/playwright-testing/playground/). Each test sets its page near the top, like this:
+
+```javascript
+const pageUrl = 'https://intopia.github.io/playwright-testing/playground/disclosures.html';
+```
+
+That means you'll need an internet connection to run them. It also means the tests here match the code in the article exactly.
+
 ## Breaking and fixing things
 
-The tests in this repo open the local copies of the pages in the `playground` folder, so you can edit a page and rerun its test. (The article's code samples point at the published pages instead, so you can run them without cloning anything.)
+You can't edit the published pages, but you can edit your local copies in the `playground` folder and point a test at those instead. Swap the `pageUrl` line for this one (changing the file name to suit):
 
-To see a test pass, fix the broken component in its page, then run the test again. Each page has a "Deliberately broken" section or a playground note explaining what's wrong.
+```javascript
+const pageUrl = 'file://' + process.cwd() + '/playground/disclosures.html';
+```
+
+`process.cwd()` means "the folder you ran the test from", so run the test from the repo folder.
+
+To see a test pass, fix the broken component in your local copy, then run the test again. Each page has a "Deliberately broken" section or a playground note explaining what's wrong.
 
 It's also worth trying the reverse: break a working component, and check the test catches it. That's how you know a test is really checking what you think it is.
+
+For example 6, the page addresses are in the `sitePages` list in `site.spec.js`. Change each `url` to a local path in the same way, such as `'file://' + process.cwd() + '/playground/site/index.html'`.
 
 ## Please note
 

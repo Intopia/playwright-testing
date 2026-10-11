@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
 
-// Where the playground page lives (inside your playwright-learning folder)
-const pageUrl = 'file://' + process.cwd() + '/playground/disclosures.html';
+// The playground page
+const pageUrl = 'https://intopia.github.io/playwright-testing/playground/disclosures.html';
 
 test('every disclosure keeps aria-expanded in sync with its content', async ({ page }) => {
-  // Open the playground page
   await page.goto(pageUrl);
 
   // Find every disclosure button: any button that controls another element
@@ -20,20 +19,12 @@ test('every disclosure keeps aria-expanded in sync with its content', async ({ p
 
     // OPEN: press Enter on the button
     await button.press('Enter');
-
-    // The content should now be visible...
     await expect.soft(panel, name + ': content should be visible when opened').toBeVisible();
-
-    // ...and the button should report that it is expanded
     await expect.soft(button, name + ': aria-expanded should be "true" when opened').toHaveAttribute('aria-expanded', 'true');
 
     // CLOSE: press Enter again
     await button.press('Enter');
-
-    // The content should now be hidden...
     await expect.soft(panel, name + ': content should be hidden when closed').toBeHidden();
-
-    // ...and the button should report that it is collapsed
     await expect.soft(button, name + ': aria-expanded should be "false" when closed').toHaveAttribute('aria-expanded', 'false');
   }
 });

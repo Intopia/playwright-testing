@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-// Where the playground page lives (inside your playwright-learning folder)
-const pageUrl = 'file://' + process.cwd() + '/playground/buttons.html';
+// The playground page
+const pageUrl = 'https://intopia.github.io/playwright-testing/playground/buttons.html';
 
 test('every button has an accessible name', async ({ page }) => {
   // Open the playground page

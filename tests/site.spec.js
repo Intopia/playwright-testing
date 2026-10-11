@@ -1,21 +1,40 @@
 import { test } from '@playwright/test';
-import { checkDisclosures, checkDialogs } from './helpers/accessibility-checks.js';
+import { checkDisclosures, checkKeyboard, checkDialogs, checkForms } from './helpers/accessibility-checks.js';
 
 // Every page on the site we want to check.
 // To cover a new page, just add it to this list.
 const sitePages = [
-  { name: 'Home', file: 'home.html' },
-  { name: 'Products', file: 'products.html' },
-  { name: 'Help', file: 'help.html' },
+  { name: 'Home', url: 'https://intopia.github.io/playwright-testing/playground/site/index.html' },
+  { name: 'Products', url: 'https://intopia.github.io/playwright-testing/playground/site/products.html' },
+  { name: 'Help', url: 'https://intopia.github.io/playwright-testing/playground/site/help.html' },
 ];
 
-// Create one test for each page in the list
+// For each page, create a group of tests: one for each reusable check
 for (const sitePage of sitePages) {
-  test(sitePage.name + ' page: disclosures and dialogs behave correctly', async ({ page }) => {
-    await page.goto('file://' + process.cwd() + '/playground/site/' + sitePage.file);
+  test.describe(sitePage.name + ' page', () => {
 
-    // Run every reusable check against this page
-    await checkDisclosures(page, sitePage.name);
-    await checkDialogs(page, sitePage.name);
+    // Before each test in this group, open the page
+    test.beforeEach(async ({ page }) => {
+      await page.goto(sitePage.url);
+    });
+
+    test('disclosures keep aria-expanded in sync', async ({ page }) => {
+      await checkDisclosures(page, sitePage.name);
+    });
+
+    test('every control can be reached with the keyboard', async ({ page, browserName }) => {
+      // WebKit skips links with Tab by default (see example 3)
+      test.skip(browserName === 'webkit', 'WebKit skips links with Tab by default');
+      await checkKeyboard(page, sitePage.name);
+    });
+
+    test('dialogs manage focus', async ({ page }) => {
+      await checkDialogs(page, sitePage.name);
+    });
+
+    test('form errors are marked invalid and linked', async ({ page }) => {
+      await checkForms(page, sitePage.name);
+    });
+
   });
 }

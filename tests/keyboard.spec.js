@@ -1,14 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-// Where the playground page lives (inside your playwright-learning folder)
-const pageUrl = 'file://' + process.cwd() + '/playground/keyboard.html';
+// The playground page
+const pageUrl = 'https://intopia.github.io/playwright-testing/playground/keyboard.html';
 
 test('every interactive control can be reached with the Tab key', async ({ page, browserName }) => {
   // WebKit follows Safari's default setting on macOS, where Tab skips links.
   // That would make this test fail for reasons unrelated to the page, so skip it there.
   test.skip(browserName === 'webkit', 'WebKit skips links with Tab by default');
 
-  // Open the playground page
   await page.goto(pageUrl);
 
   // The controls we expect keyboard users to reach:
@@ -21,15 +20,14 @@ test('every interactive control can be reached with the Tab key', async ({ page,
     .or(page.getByRole('combobox'))
     .all();
 
-  // Press Tab through the page. Each time, leave a marker on whatever
-  // has focus, so we can check later which controls were reached.
+  // Press Tab through the page. Each time, mark whatever has focus.
   // (We press Tab twice as many times as there are controls, to be safe.)
   for (let i = 0; i < controls.length * 2; i++) {
     await page.keyboard.press('Tab');
     await page.evaluate(() => document.activeElement.setAttribute('data-reached', ''));
   }
 
-  // Check every control received the marker
+  // Check every control was marked
   for (const control of controls) {
     const markup = await control.evaluate(el => el.outerHTML);
 
