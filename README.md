@@ -1,8 +1,8 @@
 # Playwright accessibility testing playground
 
-Test pages and Playwright tests for the article [Accessibility testing with Playwright: what axe-core can't see](#).
+Test pages and Playwright tests for the resource [Accessibility testing with Playwright](#).
 
-The article shows what Playwright can check that axe-core can't: changing states, keyboard use, focus movement, form errors that only appear after submitting, and running the same checks across a whole site.
+The resource shows what Playwright can check that axe-core can't: changing states, keyboard use, focus movement, form errors that only appear after submitting, and running the same checks across a whole site.
 
 Each test page contains working components and at least one deliberately broken one. Run the matching test, and you should see it pass for the working components and fail for the broken one, for exactly the reason it should.
 
@@ -95,7 +95,7 @@ The test files run on your computer, but the pages they test are the published o
 const pageUrl = 'https://intopia.github.io/playwright-testing/playground/disclosures.html';
 ```
 
-That means you'll need an internet connection to run them. It also means the tests here match the code in the article exactly.
+That means you'll need an internet connection to run them. It also means the tests here match the code in the resource exactly.
 
 ## Breaking and fixing things
 
