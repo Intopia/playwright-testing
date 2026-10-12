@@ -1,6 +1,6 @@
 # Playwright accessibility testing playground
 
-Test pages and Playwright tests for the resource [Accessibility testing with Playwright](#).
+Test pages and Playwright tests for the resource [Accessibility testing with Playwright](https://intopia.github.io/exercise/accessibility-testing-with-playwright.html).
 
 The resource shows what Playwright can check that axe-core can't: changing states, keyboard use, focus movement, form errors that only appear after submitting, and running the same checks across a whole site.
 
