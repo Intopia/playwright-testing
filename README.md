@@ -82,7 +82,7 @@ npx playwright show-report
 
 A few things worth knowing:
 
-- **Keyboard tests are skipped in WebKit.** Playwright's WebKit follows Safari's default setting on macOS, where Tab skips links. The skip reason appears in the report. This applies to example 3, and to the keyboard tests in example 6.
+- **Keyboard tests are skipped in WebKit.** On macOS, Playwright's WebKit follows the system keyboard navigation setting, where Tab skips links by default. The skip reason appears in the report. This applies to example 3, and to the keyboard tests in example 6.
 - **The forms test reports two failures.** One for each broken field, and each field fails a different check.
 - **The site test runs 36 tests.** That's three pages, four checks each, in three browsers. Most pass. The failures point to the two broken components.
 - **Failing tests are slow.** Each failing check waits up to 5 seconds in case the page is still updating.

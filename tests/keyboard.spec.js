@@ -4,8 +4,9 @@ import { test, expect } from '@playwright/test';
 const pageUrl = 'https://intopia.github.io/playwright-testing/playground/keyboard.html';
 
 test('every interactive control can be reached with the Tab key', async ({ page, browserName }) => {
-  // WebKit follows Safari's default setting on macOS, where Tab skips links.
-  // That would make this test fail for reasons unrelated to the page, so skip it there.
+  // On macOS, Playwright's WebKit follows the system keyboard navigation setting,
+  // where Tab skips links by default. That would make this test fail for reasons
+  // unrelated to the page, so skip it there.
   test.skip(browserName === 'webkit', 'WebKit skips links with Tab by default');
 
   await page.goto(pageUrl);
