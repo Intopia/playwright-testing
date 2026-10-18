@@ -724,64 +724,513 @@ Watch out for:
 
 Control everything with your own code: what gets tested, what gets shown, and when it runs. By the end of this rung, you'll have a check that shows only critical and serious issues, re-runs whenever the page changes, writes a report and passes or fails.
 
+In this rung, you'll build one script, `check.js`, a little at a time. Each step adds or changes one part of it.
+
 ### Steps
 
 #### 20. Write a basic check script
 
-Create `check.js`, a script that uses Playwright to open the page and the axe add-on to run axe, then prints how many violations it found.
+Create a script that uses Playwright to open the test page, and the axe add-on to run axe on it. To start with, it just prints how many violations it found.
+
+Create the file and open it:
+
+**Mac:**
+
+```
+touch check.js
+code check.js
+```
+
+**Windows:**
+
+```bat
+type nul > check.js
+notepad check.js
+```
+
+Paste in the following code, then save the file:
+
+```js
+// Load the tools
+const { chromium } = require('playwright');
+const AxeBuilder = require('@axe-core/playwright').default;
+const path = require('path');
+const { pathToFileURL } = require('url');
+
+(async () => {
+  // Open an invisible browser, a fresh private window, and a new tab
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  // Load the test page from this folder
+  await page.goto(pathToFileURL(path.join(__dirname, 'test-page.html')).href);
+
+  // Inject axe, run it, and store the results
+  const results = await new AxeBuilder({ page }).analyze();
+
+  // PRINT THE RESULTS
+  console.log('Violations found:', results.violations.length);
+
+  // Close the browser
+  await browser.close();
+})();
+```
+
+In plain terms, it's the console steps from rung 1, done by code:
+
+1. Open a browser and a tab.
+2. Load the test page.
+3. Inject axe, run it, and store the results.
+4. Print how many rules failed.
+5. Close the browser.
+
+Don't worry about the `(async () => { ... })();` wrapper. It's just what lets the script wait for each step to finish before moving on to the next.
+
+Now run it:
+
+```
+node check.js
+```
+
+After a few seconds, you should see:
+
+```
+Violations found: 7
+```
 
 Watch out for:
 
-- Save the file into your `axe-learning` folder. A "Cannot find module" error usually means it saved somewhere else.
-- The tab has to be opened inside a browser context (`browser.newContext()`). Opening it straight from the browser causes a "Please use browser.newContext()" error.
+- A "Cannot find module ...check.js" error means the file isn't in your `axe-learning` folder, or has a different name, such as `check.js.txt`. List your files (`ls` on Mac, `dir` on Windows) to check.
+- An error saying a browser "executable doesn't exist" means Playwright's browser isn't installed. Run `npx playwright install chromium`, then try again.
+- Playwright uses its own browser, so you don't need the ChromeDriver path from rung 2 here.
+- The tab has to be opened inside a fresh window, which Playwright calls a browser context (`browser.newContext()`). Opening a tab straight from the browser causes a "Please use browser.newContext()" error.
 
 #### 21. Show only critical and serious
 
-Filter the violations to critical and serious, then print each one with its impact, rule, help text and failing HTML. The command line tool can't do this, which is why rung 3 is needed.
+Change the script so it only shows critical and serious violations, and prints the details of each one. The command line tool can't do this, which is one of the main reasons to write your own script.
+
+In `check.js`, find this part:
+
+```js
+  // PRINT THE RESULTS
+  console.log('Violations found:', results.violations.length);
+```
+
+Replace it with this, then save the file:
+
+```js
+  // KEEP ONLY CRITICAL AND SERIOUS
+  const important = results.violations.filter(
+    v => v.impact === 'critical' || v.impact === 'serious'
+  );
+
+  // PRINT THE RESULTS
+  console.log(`Critical and serious issues: ${important.length}`);
+  important.forEach(v => {
+    console.log(`\n[${v.impact}] ${v.id}: ${v.help}`);
+    v.nodes.forEach(n => console.log(`  - ${n.html}`));
+  });
+```
+
+In plain terms:
+
+- The first part is the same filter you used in the console in rung 1: keep only the critical and serious violations.
+- The second part prints a count, then each issue's severity, rule and short description, with the problem code underneath.
+
+Run it again:
+
+```
+node check.js
+```
+
+You should see `Critical and serious issues: 6`, followed by the six issues. `heading-order` is gone, because it's moderate.
+
+Watch out for:
+
+- Replace the whole "PRINT THE RESULTS" part, including the old `console.log` line. If you leave the old line in, you'll see both outputs.
+- The `\n` adds a blank line between issues, to make the output easier to read.
 
 #### 22. Sort the most severe issues to the top
 
-Sort the list so critical issues appear before serious ones.
+axe lists issues alphabetically, so critical and serious ones are mixed together. Sort them so the critical ones come first.
+
+In `check.js`, find the filter you added in step 21:
+
+```js
+  const important = results.violations.filter(
+    v => v.impact === 'critical' || v.impact === 'serious'
+  );
+```
+
+Directly below it, add these lines, then save the file:
+
+```js
+
+  // SORT CRITICAL ISSUES TO THE TOP
+  const order = { critical: 0, serious: 1 };
+  important.sort((a, b) => order[a.impact] - order[b.impact]);
+```
+
+In plain terms:
+
+- The first line is a ranking: critical comes first (0), serious second (1).
+- The second line sorts the issues by that ranking.
+
+Run it again:
+
+```
+node check.js
+```
+
+You should now see the three critical issues (`button-name`, `image-alt`, `label`) first, then the three serious ones.
 
 #### 23. Re-run whenever the page changes
 
-Use Node's watch mode to re-run the script every time `test-page.html` is saved. This simulates a developer fixing problems as they work.
+Node has a built-in **watch mode**. It runs your script, then keeps an eye on a file, and runs the script again every time that file is saved. This simulates a developer fixing problems as they work.
+
+Type:
+
+```
+node --watch-path=test-page.html check.js
+```
+
+In plain terms: "run `check.js`, then watch `test-page.html`, and run it again whenever that file changes."
+
+You'll see the same 6 issues as before. This time you won't get your prompt back, because watch mode keeps running, waiting for changes.
+
+**To test it:**
+
+1. Leave the command line window open and running.
+2. Open `test-page.html` in your editor.
+3. Change `<html>` to `<html lang="en">`, then save the file.
+4. Look back at the command line window.
+
+The script should run again by itself, and now say `Critical and serious issues: 5`, with `html-has-lang` gone.
+
+Undo the change (change `<html lang="en">` back to `<html>`) and save again. The count should go back to 6.
+
+To stop watch mode, press **Control + C** on Mac, or **Ctrl + C** on Windows.
 
 Watch out for:
 
-- Watch mode keeps running, so you won't get your Terminal prompt back. Press **Control + C** to stop it.
 - The screen clears before each run, so it can look like a new window.
+- You may see a message saying watch mode is "experimental". That's fine. It just means Node is still polishing the feature.
+- Watch mode only watches `test-page.html`. If you change `check.js`, stop watch mode and start it again.
 
 #### 24. Add check and watch shortcuts
 
-Add `check` and `watch` scripts to `package.json`.
+Add two more shortcuts to `package.json`, so you don't have to type the long commands.
+
+Open `package.json` in your editor:
+
+**Mac:**
+
+```
+code package.json
+```
+
+**Windows:**
+
+```bat
+notepad package.json
+```
+
+Find the `"scripts"` part you changed in step 18. Add a comma to the end of the `"report"` line, then add two new lines underneath, so it looks like this:
+
+**Mac:**
+
+```json
+  "scripts": {
+    "report": "axe \"file://$PWD/test-page.html\" --save results.json && node make-report.js && open -a \"Google Chrome\" report-full.html",
+    "check": "node check.js",
+    "watch": "node --watch-path=test-page.html check.js"
+  },
+```
+
+**Windows:**
+
+```json
+  "scripts": {
+    "report": "axe \"file:///%cd%/test-page.html\" --save results.json --chromedriver-path node_modules/chromedriver/lib/chromedriver/chromedriver.exe && node make-report.js && start chrome \"%cd%\\report-full.html\"",
+    "check": "node check.js",
+    "watch": "node --watch-path=test-page.html check.js"
+  },
+```
+
+Save the file, then try both:
+
+```
+npm run check
+```
+
+```
+npm run watch
+```
+
+`npm run check` runs once and stops. `npm run watch` keeps running and re-checks every time you save `test-page.html`. Press **Control + C** (Mac) or **Ctrl + C** (Windows) to stop it.
 
 Watch out for:
 
-- `npm run check` runs once and stops. `npm run watch` keeps running and re-checks on every save.
+- Every line inside `"scripts"` ends with a comma, except the last one. A missing or extra comma breaks the whole file.
+- On Windows, stopping `npm run watch` may ask "Terminate batch job (Y/N)?". Type `Y` and press Enter.
+- Think of it this way: "check" is what you'd run once before handing over your work, and "watch" is what you'd leave running while you work.
 
 #### 25. Write a simple HTML report
 
-Add code to `check.js` that saves the critical and serious issues as `report.html`.
+Add code to `check.js` that saves the critical and serious issues as a simple web page, `report.html`.
+
+**Part A.** At the very top of `check.js`, in the "Load the tools" section, add this line:
+
+```js
+const fs = require('fs');
+```
+
+`fs` stands for "file system". It's Node's built-in tool for reading and writing files.
+
+**Part B.** Find this part, near the bottom:
+
+```js
+  // Close the browser
+  await browser.close();
+```
+
+Directly **above** it, add this code, then save the file:
+
+```js
+  // WRITE A SIMPLE HTML REPORT
+  const escape = s => String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  const items = important.map(v => `
+    <li>
+      <h2>[${v.impact}] ${escape(v.id)}</h2>
+      <p>${escape(v.help)}</p>
+      <ul>${v.nodes.map(n => `<li><code>${escape(n.html)}</code></li>`).join('')}</ul>
+      <p><a href="${v.helpUrl}">More about ${escape(v.id)}</a></p>
+    </li>`).join('');
+
+  const report = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>axe report</title></head>
+<body>
+<main>
+<h1>axe report: ${important.length} critical and serious issues</h1>
+<ol>${items}</ol>
+</main>
+</body>
+</html>`;
+
+  fs.writeFileSync(path.join(__dirname, 'report.html'), report);
+  console.log('\nReport saved to report.html');
+
+```
+
+In plain terms:
+
+- `escape` turns `<` into `&lt;` and so on, so the problem code shows up as text, not as real buttons and links.
+- `items` builds one list item for each issue, with its heading, description, problem code and a help link.
+- `report` wraps the items in a basic, accessible web page.
+- `writeFileSync` saves the page as `report.html` in your folder.
+
+Run the check, then open the report:
+
+**Mac:**
+
+```
+npm run check
+open -a "Google Chrome" report.html
+```
+
+**Windows:**
+
+```bat
+npm run check
+start chrome "%cd%\report.html"
+```
+
+You should see `Report saved to report.html` at the end of the output, and the report should list the 6 issues, critical ones first.
 
 Watch out for:
 
 - This report is separate from the full report in rung 2. It only shows critical and serious issues.
+- The report code must go **above** the "Close the browser" part, still inside the `(async () => { ... })();` wrapper.
 
 #### 26. Pass or fail
 
 End the script with a clear PASS or FAIL, and set an **exit code**. An exit code is a number every command reports when it finishes. 0 means success, and anything else means failure. This is how automated build tools decide whether to block code.
 
+In `check.js`, find this part:
+
+```js
+  // Close the browser
+  await browser.close();
+```
+
+Directly **below** it (before the final `})();`), add this code, then save the file:
+
+```js
+
+  // PASS OR FAIL
+  if (important.length > 0) {
+    console.log('\nFAIL: critical or serious issues found');
+    process.exitCode = 1;
+  } else {
+    console.log('\nPASS: no critical or serious issues');
+  }
+```
+
+In plain terms: "if there are any critical or serious issues, say FAIL and set the exit code to 1. Otherwise, say PASS."
+
+Run it:
+
+```
+npm run check
+```
+
+You should see the 6 issues, then `FAIL: critical or serious issues found`.
+
 Watch out for:
 
-- npm adds a few error lines of its own when the script fails. That's not a bug, it's npm noticing the exit code.
-- The PASS or FAIL message only appears in Terminal, not in the report.
+- npm adds a few error lines of its own after FAIL, saying the script failed. That's not a bug. It's npm noticing the exit code of 1, which proves it works.
+- The PASS or FAIL message only appears in the command line window, not in the report.
+
+**Your finished `check.js`** should look like this. If something isn't working, compare your file against it:
+
+```js
+// Load the tools
+const { chromium } = require('playwright');
+const AxeBuilder = require('@axe-core/playwright').default;
+const path = require('path');
+const { pathToFileURL } = require('url');
+const fs = require('fs');
+
+(async () => {
+  // Open an invisible browser, a fresh private window, and a new tab
+  const browser = await chromium.launch();
+  const context = await browser.newContext();
+  const page = await context.newPage();
+
+  // Load the test page from this folder
+  await page.goto(pathToFileURL(path.join(__dirname, 'test-page.html')).href);
+
+  // Inject axe, run it, and store the results
+  const results = await new AxeBuilder({ page }).analyze();
+
+  // KEEP ONLY CRITICAL AND SERIOUS
+  const important = results.violations.filter(
+    v => v.impact === 'critical' || v.impact === 'serious'
+  );
+
+  // SORT CRITICAL ISSUES TO THE TOP
+  const order = { critical: 0, serious: 1 };
+  important.sort((a, b) => order[a.impact] - order[b.impact]);
+
+  // PRINT THE RESULTS
+  console.log(`Critical and serious issues: ${important.length}`);
+  important.forEach(v => {
+    console.log(`\n[${v.impact}] ${v.id}: ${v.help}`);
+    v.nodes.forEach(n => console.log(`  - ${n.html}`));
+  });
+
+  // WRITE A SIMPLE HTML REPORT
+  const escape = s => String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  const items = important.map(v => `
+    <li>
+      <h2>[${v.impact}] ${escape(v.id)}</h2>
+      <p>${escape(v.help)}</p>
+      <ul>${v.nodes.map(n => `<li><code>${escape(n.html)}</code></li>`).join('')}</ul>
+      <p><a href="${v.helpUrl}">More about ${escape(v.id)}</a></p>
+    </li>`).join('');
+
+  const report = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>axe report</title></head>
+<body>
+<main>
+<h1>axe report: ${important.length} critical and serious issues</h1>
+<ol>${items}</ol>
+</main>
+</body>
+</html>`;
+
+  fs.writeFileSync(path.join(__dirname, 'report.html'), report);
+  console.log('\nReport saved to report.html');
+
+  // Close the browser
+  await browser.close();
+
+  // PASS OR FAIL
+  if (important.length > 0) {
+    console.log('\nFAIL: critical or serious issues found');
+    process.exitCode = 1;
+  } else {
+    console.log('\nPASS: no critical or serious issues');
+  }
+})();
+```
 
 #### 27. Fix the page and reach PASS
 
-Run watch mode, fix the six critical and serious problems one at a time, and watch the count drop to zero and PASS.
+Fix the six critical and serious problems one at a time, and watch the count drop until the check passes.
+
+**First, keep a broken copy of the page**, so you can reset it later:
+
+**Mac:**
+
+```
+cp test-page.html test-page-broken.html
+```
+
+**Windows:**
+
+```bat
+copy test-page.html test-page-broken.html
+```
+
+Then start watch mode:
+
+```
+npm run watch
+```
+
+Open `test-page.html` in your editor. Make each of these changes, saving after each one, and watch the count go down in the command line window:
+
+| Problem | Change this | To this |
+|---|---|---|
+| No page language | `<html>` | `<html lang="en">` |
+| Image with no alt text | `<img src="photo.jpg">` | `<img src="photo.jpg" alt="">` |
+| Input with no label | `<input type="text">` | `<label>Name <input type="text"></label>` |
+| Button with no name | `<button></button>` | `<button>Send</button>` |
+| Link with no text | `<a href="#"></a>` | `<a href="#">Home</a>` |
+| Low contrast text | `.faint { color: #aaa; }` | `.faint { color: #595959; }` |
+
+After the last change, you should see `Critical and serious issues: 0` and `PASS: no critical or serious issues`.
+
+Press **Control + C** (Mac) or **Ctrl + C** (Windows) to stop watch mode.
+
+**To reset the page** with all its errors back in place:
+
+**Mac:**
+
+```
+cp test-page-broken.html test-page.html
+```
+
+**Windows:**
+
+```bat
+copy /Y test-page-broken.html test-page.html
+```
 
 Watch out for:
 
-- The `heading-order` problem is still on the page at PASS, because it's moderate. A good reminder of what severity filters let through.
-- Keep a broken copy of the page, such as `test-page-broken.html`, so you can reset it before a demo.
+- The `heading-order` problem is still on the page at PASS, because it's moderate. It's a good reminder of what severity filters let through.
+- The `alt=""` fix marks the image as decorative. On a real page, an image that carries meaning needs alt text that describes it.
+- On Windows, `/Y` means "yes, replace the existing file" without asking first.
