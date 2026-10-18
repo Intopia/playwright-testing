@@ -316,6 +316,14 @@ Run axe without opening a browser yourself, save the results to a file, and turn
 
 Run one command that opens an invisible copy of Chrome, loads the page, injects axe and lists the problems. It's the same steps as rung 1, done for you.
 
+On Mac:
+
+```bat
+npx axe "file://$PWD/test-page.html"
+```
+
+On Windows:
+
 ```bat
 npx axe "file:///%cd%/test-page.html" --chromedriver-path "node_modules\chromedriver\lib\chromedriver\chromedriver.exe"
 ```
