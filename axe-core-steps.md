@@ -5,15 +5,49 @@ This guide climbs a ladder in three rungs. You start by running axe-core by hand
 **Before you start:** complete the "Getting set up" steps first. You should have:
 
 - Node.js 22.12 or higher
-- an `axe-learning` folder in Documents, already set up as a project
+- an `axe-learning` folder, already set up as a project
 - the three axe and Playwright tools installed in that folder
-- Google Chrome installed.
+- Google Chrome installed
+- a matching ChromeDriver installed, if you needed the ChromeDriver fix during setup.
 
 **The idea behind all three rungs:** load a page, inject axe into it, run axe, then do something with the results. Every axe tool, from browser extensions to big test suites, is just a different way of doing those four things.
 
+## Table of contents
+
+- [Rung 1: Running axe-core via the browser console](#rung-1-running-axe-core-via-the-browser-console)
+  - [1. Create the test page](#1-create-the-test-page)
+  - [2. Open the page in Chrome](#2-open-the-page-in-chrome)
+  - [3. Open the console](#3-open-the-console)
+  - [4. Load axe-core into the page](#4-load-axe-core-into-the-page)
+  - [5. Check axe has loaded](#5-check-axe-has-loaded)
+  - [6. Run axe](#6-run-axe)
+  - [7. Explore the four buckets](#7-explore-the-four-buckets)
+  - [8. Show the violations as a table](#8-show-the-violations-as-a-table)
+  - [9. Filter to critical and serious](#9-filter-to-critical-and-serious)
+  - [10. See which elements failed](#10-see-which-elements-failed)
+  - [11. Bonus: all in one script](#11-bonus-all-in-one-script)
+  - [Optional: compare with the axe DevTools extension](#optional-compare-with-the-axe-devtools-extension)
+- [Rung 2: Running axe-core via the command line](#rung-2-running-axe-core-via-the-command-line)
+  - [12. Run axe from the command line](#12-run-axe-from-the-command-line)
+  - [13. Run WCAG rules only](#13-run-wcag-rules-only)
+  - [14. Save the results to a file](#14-save-the-results-to-a-file)
+  - [15. Explore the JSON file](#15-explore-the-json-file)
+  - [16. Write a reporting script](#16-write-a-reporting-script)
+  - [17. Run the report](#17-run-the-report)
+  - [18. Add a shortcut command](#18-add-a-shortcut-command)
+- [Rung 3: Running axe-core via a Playwright script](#rung-3-running-axe-core-via-a-playwright-script)
+  - [19. Write a basic check script](#19-write-a-basic-check-script)
+  - [20. Show only critical and serious](#20-show-only-critical-and-serious)
+  - [21. Sort the most severe issues to the top](#21-sort-the-most-severe-issues-to-the-top)
+  - [22. Re-run whenever the page changes](#22-re-run-whenever-the-page-changes)
+  - [23. Add check and watch shortcuts](#23-add-check-and-watch-shortcuts)
+  - [24. Write a simple HTML report](#24-write-a-simple-html-report)
+  - [25. Pass or fail](#25-pass-or-fail)
+  - [26. Fix the page and reach PASS](#26-fix-the-page-and-reach-pass)
+
 ---
 
-## Rung 1: browser console
+## Rung 1: Running axe-core via the browser console
 
 ### Purpose
 
@@ -27,18 +61,18 @@ This page has 7 deliberately planted accessibility errors, each labelled with a 
 
 If you're not already in your `axe-learning` folder, move into it first (see "Getting set up").
 
-**Windows:** create an empty file, then open it in Notepad:
-
-```
-type nul > test-page.html
-notepad test-page.html
-```
-
 **Mac:** create an empty file, then open it in your code editor. For example, if you use VS Code:
 
 ```
 touch test-page.html
 code test-page.html
+```
+
+**Windows:** create an empty file, then open it in Notepad:
+
+```bat
+type nul > test-page.html
+notepad test-page.html
 ```
 
 Paste the following into the file, then save it (**Ctrl + S** on Windows, **Command + S** on Mac):
@@ -82,24 +116,25 @@ Paste the following into the file, then save it (**Ctrl + S** on Windows, **Comm
 
 Watch out for:
 
-- On Windows, don't use `start test-page.html` to open the file. That opens it in a browser, not an editor.
+- On Mac, the `code` command only works once VS Code has been set up for it. If you see "command not found", open VS Code, press **Command + Shift + P**, type `shell command`, and choose **Install 'code' command in PATH**. Then try again.
 - On Mac, avoid TextEdit. It can save files as formatted text instead of plain code.
+- On Windows, don't use `start test-page.html` to open the file. That opens it in a browser, not an editor.
 - The page uses an image that doesn't exist. That's on purpose, because axe only cares about the markup.
 
 #### 2. Open the page in Chrome
 
 Open the test page in Chrome, since its console is the easiest to work with.
 
-**Windows:**
-
-```
-start chrome test-page.html
-```
-
 **Mac:**
 
 ```
 open -a "Google Chrome" test-page.html
+```
+
+**Windows:**
+
+```bat
+start chrome test-page.html
 ```
 
 You should see a heading, a broken image icon, an empty text box, a tiny empty button and some faint grey text.
@@ -112,8 +147,8 @@ Watch out for:
 
 Open Chrome's developer tools and go to the **Console** tab. This is where you'll type JavaScript straight into the page.
 
-- **Windows:** Ctrl + Shift + J
 - **Mac:** Command + Option + J
+- **Windows:** Ctrl + Shift + J
 
 Watch out for:
 
@@ -304,7 +339,7 @@ Watch out for:
 
 ---
 
-## Rung 2: command line
+## Rung 2: Running axe-core via the command line
 
 ### Purpose
 
@@ -318,7 +353,7 @@ Run one command that opens an invisible copy of Chrome, loads the page, injects 
 
 **Mac:**
 
-```bat
+```
 npx axe "file://$PWD/test-page.html"
 ```
 
@@ -328,16 +363,17 @@ npx axe "file://$PWD/test-page.html"
 npx axe "file:///%cd%/test-page.html" --chromedriver-path "node_modules\chromedriver\lib\chromedriver\chromedriver.exe"
 ```
 
-In plain terms: "run axe on the test page in this folder, using the ChromeDriver you installed during setup."
+In plain terms: "run axe on the test page in this folder." On Windows, it also says "use the ChromeDriver you installed during setup."
 
-- `file:///` tells axe the page is a file on your computer, not a website.
-- `%cd%` fills in the folder you're currently in, so you don't have to type the whole path.
+- `file://` tells axe the page is a file on your computer, not a website.
+- `$PWD` (Mac) and `%cd%` (Windows) fill in the folder you're currently in, so you don't have to type the whole path.
 
 You should see 7 issues, the same as in rung 1.
 
 Watch out for:
 
-- Check the first line of the output. It should say `Testing file:///C:/Users/...`. If it says `Testing http://test-page.html`, the `file:///` part is missing, and axe is checking an error page instead of your file.
+- Check the first line of the output. It should start with `Testing file:///`. If it says `Testing http://test-page.html`, the `file://` part is missing, and axe is checking an error page instead of your file.
+- If you get a ChromeDriver error on a Mac, use the same fix as on Windows (see "Getting set up"). The path to add on a Mac is `--chromedriver-path "node_modules/chromedriver/lib/chromedriver/chromedriver"`.
 - Keep the quotes around the page address and the ChromeDriver path.
 - If you skipped the ChromeDriver fix in "Getting set up", leave out the `--chromedriver-path` part.
 - The command line output doesn't show impact levels, and has no option to filter by them.
@@ -392,7 +428,7 @@ You'll see the same list of 7 issues as in step 12, plus a line saying where the
 Watch out for:
 
 - Each run replaces the file with the latest results.
-- This command leaves out `--tags`, so the file includes all 7 issues, best practices included. The report you build in step 15 then has more to show.
+- This command leaves out `--tags`, so the file includes all 7 issues, best practices included. The report you build in step 16 then has more to show.
 
 #### 15. Explore the JSON file
 
@@ -667,7 +703,7 @@ Watch out for:
 
 ---
 
-## Rung 3: script with Playwright
+## Rung 3: Running axe-core via a Playwright script
 
 ### Purpose
 
@@ -675,7 +711,7 @@ Control everything with your own code: what gets tested, what gets shown, and wh
 
 ### Steps
 
-#### 18. Write a basic check script
+#### 19. Write a basic check script
 
 Create `check.js`, a script that uses Playwright to open the page and the axe add-on to run axe, then prints how many violations it found.
 
@@ -684,15 +720,15 @@ Watch out for:
 - Save the file into your `axe-learning` folder. A "Cannot find module" error usually means it saved somewhere else.
 - The tab has to be opened inside a browser context (`browser.newContext()`). Opening it straight from the browser causes a "Please use browser.newContext()" error.
 
-#### 19. Show only critical and serious
+#### 20. Show only critical and serious
 
 Filter the violations to critical and serious, then print each one with its impact, rule, help text and failing HTML. The command line tool can't do this, which is why rung 3 is needed.
 
-#### 20. Sort the most severe issues to the top
+#### 21. Sort the most severe issues to the top
 
 Sort the list so critical issues appear before serious ones.
 
-#### 21. Re-run whenever the page changes
+#### 22. Re-run whenever the page changes
 
 Use Node's watch mode to re-run the script every time `test-page.html` is saved. This simulates a developer fixing problems as they work.
 
@@ -701,7 +737,7 @@ Watch out for:
 - Watch mode keeps running, so you won't get your Terminal prompt back. Press **Control + C** to stop it.
 - The screen clears before each run, so it can look like a new window.
 
-#### 22. Add check and watch shortcuts
+#### 23. Add check and watch shortcuts
 
 Add `check` and `watch` scripts to `package.json`.
 
@@ -709,7 +745,7 @@ Watch out for:
 
 - `npm run check` runs once and stops. `npm run watch` keeps running and re-checks on every save.
 
-#### 23. Write a simple HTML report
+#### 24. Write a simple HTML report
 
 Add code to `check.js` that saves the critical and serious issues as `report.html`.
 
@@ -717,7 +753,7 @@ Watch out for:
 
 - This report is separate from the full report in rung 2. It only shows critical and serious issues.
 
-#### 24. Pass or fail
+#### 25. Pass or fail
 
 End the script with a clear PASS or FAIL, and set an **exit code**. An exit code is a number every command reports when it finishes. 0 means success, and anything else means failure. This is how automated build tools decide whether to block code.
 
@@ -726,7 +762,7 @@ Watch out for:
 - npm adds a few error lines of its own when the script fails. That's not a bug, it's npm noticing the exit code.
 - The PASS or FAIL message only appears in Terminal, not in the report.
 
-#### 25. Fix the page and reach PASS
+#### 26. Fix the page and reach PASS
 
 Run watch mode, fix the six critical and serious problems one at a time, and watch the count drop to zero and PASS.
 
