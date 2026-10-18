@@ -316,13 +316,13 @@ Run axe without opening a browser yourself, save the results to a file, and turn
 
 Run one command that opens an invisible copy of Chrome, loads the page, injects axe and lists the problems. It's the same steps as rung 1, done for you.
 
-On Mac:
+**Mac:**
 
 ```bat
 npx axe "file://$PWD/test-page.html"
 ```
 
-On Windows:
+**Windows:**
 
 ```bat
 npx axe "file:///%cd%/test-page.html" --chromedriver-path "node_modules\chromedriver\lib\chromedriver\chromedriver.exe"
@@ -342,23 +342,59 @@ Watch out for:
 - If you skipped the ChromeDriver fix in "Getting set up", leave out the `--chromedriver-path` part.
 - The command line output doesn't show impact levels, and has no option to filter by them.
 
-#### 12. Run WCAG rules only
+#### 13. Run WCAG rules only
 
 Add `--tags wcag2a,wcag2aa` to only run rules for WCAG levels A and AA. This does the same job as turning off the extension's Best Practices setting.
 
+**Mac:**
+
+```
+npx axe "file://$PWD/test-page.html" --tags wcag2a,wcag2aa
+```
+
+**Windows:**
+
+```bat
+npx axe "file:///%cd%/test-page.html" --tags wcag2a,wcag2aa --chromedriver-path "node_modules\chromedriver\lib\chromedriver\chromedriver.exe"
+```
+
+In plain terms: "same as before, but only run rules tagged WCAG 2 level A or AA."
+
+You should see 6 issues. `heading-order` is gone, because it's a best practice rule, not a WCAG requirement.
+
 Watch out for:
 
+- Don't put spaces after the commas in the tag list. `wcag2a, wcag2aa` would break it.
 - Each WCAG version has its own tags. Testing against WCAG 2.2 AA means listing them all: `wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22aa`.
 
-#### 13. Save the results to a file
+#### 14. Save the results to a file
 
-Add `--save results.json` to save the full results as a JSON file.
+Add `--save results.json` to save the full results as a JSON file. JSON is a plain-text format for structured data. It's the same results you explored in the console in rung 1, written into a file.
+
+**Mac:**
+
+```
+npx axe "file://$PWD/test-page.html" --save results.json
+```
+
+**Windows:**
+
+```bat
+npx axe "file:///%cd%/test-page.html" --save results.json --chromedriver-path "node_modules\chromedriver\lib\chromedriver\chromedriver.exe"
+```
+
+In plain terms: "run axe on the test page, and also save the full results into a file called `results.json`."
+
+You'll see the same list of 7 issues as in step 12, plus a line saying where the results were saved.
+
+**To check it worked**, list the files in your folder (`ls` on Mac, `dir` on Windows). You should see `results.json`.
 
 Watch out for:
 
 - Each run replaces the file with the latest results.
+- This command leaves out `--tags`, so the file includes all 7 issues, best practices included. The report you build in step 15 then has more to show.
 
-#### 14. Explore the JSON file
+#### 15. Explore the JSON file
 
 Open `results.json` and find the same groups and fields you saw in the console: violations, impact, nodes, tags, help and the "how to fix" summaries.
 
@@ -368,35 +404,124 @@ Watch out for:
 - The rules under **inapplicable** look like errors, but they're rules that had nothing to check.
 - `"impact": null` means the rule passed or didn't apply. Impact is only filled in when something fails.
 
-#### 15. Write a reporting script
+#### 16. Explore the JSON file
 
-Create `make-report.js`, a script that reads `results.json` and writes a full HTML report. The report includes test details, a summary, every violation with its tags and description, the failing elements with "how to fix" text, and a needs-review list.
+Open `results.json` in Chrome, and find the same groups and fields you saw in the console: violations, impact, nodes, tags, help and the "how to fix" summaries.
+
+**Mac:**
+
+```
+open -a "Google Chrome" results.json
+```
+
+**Windows:**
+
+```bat
+start chrome results.json
+```
+
+Chrome shows the file as one long block of text. Tick the **Pretty-print** checkbox at the top of the page to lay it out neatly, with each item on its own line.
+
+You can also open it in your code editor, if you'd rather.
 
 Watch out for:
 
-- The command line tool saves a **list** of results, one for each page tested, so the script reads the first item.
-- Any HTML in the results has to be escaped. Otherwise code like `<button></button>` would show up in the report as a real button.
+- Scroll down past **inapplicable** to find **violations**. It's near the end of the file.
+- The rules under **inapplicable** look like errors, but they're rules that had nothing to check.
+- `"impact": null` means the rule passed or didn't apply. Impact is only filled in when something fails.
+- A JSON viewer extension, such as JSON Formatter, makes the file even easier to read, with sections you can collapse.
 
-#### 16. Run the report
+#### 17. Run the report
 
-Run `node make-report.js`, then open `report-full.html`.
+Run the reporting script, then open the report in Chrome.
+
+**Mac:**
+
+```
+node make-report.js
+open -a "Google Chrome" report-full.html
+```
+
+**Windows:**
+
+```bat
+node make-report.js
+start chrome report-full.html
+```
+
+Type each line separately, pressing Enter after each one.
+
+In plain terms: "run the script that turns `results.json` into a report, then open the report."
+
+After the first line, you should see `Full report saved to report-full.html`. The report shows the test details, a summary, then all 7 violations, sorted from critical to moderate. Each one comes with its tags, description, the problem code, and "how to fix" text.
 
 Watch out for:
 
-- The report only shows what's in the latest `results.json`. Run step 13 again first if you've changed the page.
+- The report only shows what's in the latest `results.json`. If you've changed the page, run step 14 again first.
 
-#### 17. Add a shortcut command
+#### 18. Add a shortcut command
 
-Add a `report` script to `package.json`, so one short command runs axe and builds the report: `npm run report`.
+Add a `report` script to `package.json`, so one short command runs axe *and* builds the report.
+
+Open `package.json` in your editor:
+
+**Mac:**
+
+```
+code package.json
+```
+
+**Windows:**
+
+```bat
+notepad package.json
+```
+
+Find this part:
+
+```json
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+```
+
+Replace it with the version for your computer, then save the file.
+
+**Mac:**
+
+```json
+  "scripts": {
+    "report": "axe \"file://$PWD/test-page.html\" --save results.json && node make-report.js"
+  },
+```
+
+**Windows:**
+
+```json
+  "scripts": {
+    "report": "axe \"file:///%cd%/test-page.html\" --save results.json --chromedriver-path node_modules/chromedriver/lib/chromedriver/chromedriver.exe && node make-report.js"
+  },
+```
+
+In plain terms: "when I type `npm run report`, run axe on the test page and save the results, then build the report."
+
+- `&&` means "then, if that worked, run this".
+- You don't need `npx` inside a script. npm already knows where to find the tools installed in your project.
+
+Now run it:
+
+```
+npm run report
+```
+
+You should see the 7 issues, then `Full report saved to report-full.html`. Open the report as in step 17 to check it's up to date.
 
 Watch out for:
 
 - JSON is very fussy. One missing comma or quote mark breaks the whole file.
 - Quote marks inside a JSON value need a backslash in front, like `\"`.
-
-#### Optional: check the report itself
-
-Run axe on `report-full.html`. An accessibility report should have no accessibility problems of its own.
+- On Windows, the ChromeDriver path uses forward slashes (`/`) here, not backslashes. Inside JSON, a backslash has a special meaning, so each one would need to be doubled. Windows is happy with forward slashes, so it's simpler to use those.
+- When Chrome updates and the ChromeDriver error comes back, install the matching ChromeDriver again (see "Getting set up"). You won't need to change this script.
 
 ---
 
