@@ -312,14 +312,26 @@ Run axe without opening a browser yourself, save the results to a file, and turn
 
 ### Steps
 
-#### 11. Run axe from the command line
+#### 12. Run axe from the command line
 
 Run one command that opens an invisible copy of Chrome, loads the page, injects axe and lists the problems. It's the same steps as rung 1, done for you.
 
+```bat
+npx axe "file:///%cd%/test-page.html" --chromedriver-path "node_modules\chromedriver\lib\chromedriver\chromedriver.exe"
+```
+
+In plain terms: "run axe on the test page in this folder, using the ChromeDriver you installed during setup."
+
+- `file:///` tells axe the page is a file on your computer, not a website.
+- `%cd%` fills in the folder you're currently in, so you don't have to type the whole path.
+
+You should see 7 issues, the same as in rung 1.
+
 Watch out for:
 
-- Keep the quotes around the page address. `$PWD` fills in your current folder's path for you.
-- An error mentioning "chromedriver" or "session not created" means your Chrome and the tool's driver don't match. See the fix in "Getting set up".
+- Check the first line of the output. It should say `Testing file:///C:/Users/...`. If it says `Testing http://test-page.html`, the `file:///` part is missing, and axe is checking an error page instead of your file.
+- Keep the quotes around the page address and the ChromeDriver path.
+- If you skipped the ChromeDriver fix in "Getting set up", leave out the `--chromedriver-path` part.
 - The command line output doesn't show impact levels, and has no option to filter by them.
 
 #### 12. Run WCAG rules only
