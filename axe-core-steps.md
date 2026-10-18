@@ -21,14 +21,6 @@ Find out what axe-core actually is by running it by hand, with no extra tools. B
 
 ### Steps
 
-## Rung 1: browser console
-
-### Purpose
-
-Find out what axe-core actually is by running it by hand, with no extra tools. By the end, you'll see that browser extensions like axe DevTools do the same steps, just with a nicer interface on top.
-
-### Steps
-
 #### 1. Create the test page
 
 This page has 7 deliberately planted accessibility errors, each labelled with a comment. Because you know exactly what's wrong with it, you'll be able to tell whether axe's results are right.
@@ -174,6 +166,8 @@ const results = await axe.run();
 
 In plain terms: "run axe on the whole page, wait for it to finish, and store everything it found in a box called `results`."
 
+Nothing will happen yet. axe has run, but the results are sitting in the box, waiting for you to look at them. The console will just show `undefined`, which means the line ran and had nothing to show.
+
 Then check how many rules failed:
 
 ```js
@@ -184,7 +178,6 @@ You should see `7`, one for each planted error.
 
 Watch out for:
 
-- The console prints `undefined` after the first line. That's normal. It just means the line ran and didn't have anything to show.
 - The count is the number of **rules that failed**, not individual problems. Three images with no alt text would still count as one failed rule.
 
 #### 7. Explore the four buckets
@@ -307,6 +300,7 @@ Run the axe DevTools extension on the same page and compare the counts. It's the
 Watch out for:
 
 - The extension's **Best Practices** setting changes the count. Turn it off and `heading-order` disappears, because it's a best practice rule, not a WCAG requirement.
+
 
 ---
 
