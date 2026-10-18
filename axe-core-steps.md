@@ -396,16 +396,6 @@ Watch out for:
 
 #### 15. Explore the JSON file
 
-Open `results.json` and find the same groups and fields you saw in the console: violations, impact, nodes, tags, help and the "how to fix" summaries.
-
-Watch out for:
-
-- A JSON viewer extension, such as JSON Formatter, makes the file much easier to read.
-- The rules under **inapplicable** look like errors, but they're rules that had nothing to check.
-- `"impact": null` means the rule passed or didn't apply. Impact is only filled in when something fails.
-
-#### 16. Explore the JSON file
-
 Open `results.json` in Chrome, and find the same groups and fields you saw in the console: violations, impact, nodes, tags, help and the "how to fix" summaries.
 
 **Mac:**
@@ -430,6 +420,158 @@ Watch out for:
 - The rules under **inapplicable** look like errors, but they're rules that had nothing to check.
 - `"impact": null` means the rule passed or didn't apply. Impact is only filled in when something fails.
 - A JSON viewer extension, such as JSON Formatter, makes the file even easier to read, with sections you can collapse.
+
+#### 16. Write a reporting script
+
+Create a script that reads `results.json` and turns it into a full HTML report. The report includes the test details, a summary, every violation with its tags and description, the failing elements with "how to fix" text, and a list of things that need a human to review.
+
+Create the file and open it:
+
+**Mac:**
+
+```
+touch make-report.js
+code make-report.js
+```
+
+**Windows:**
+
+```bat
+type nul > make-report.js
+notepad make-report.js
+```
+
+Paste in the following code, then save the file:
+
+```js
+// Load Node's built-in file tools
+const fs = require('fs');
+const path = require('path');
+
+// 1. Read the JSON file saved by the axe CLI
+const raw = fs.readFileSync(path.join(__dirname, 'results.json'), 'utf8');
+const data = JSON.parse(raw);
+
+// The CLI saves a list (one item per page tested). We take the first page.
+const results = Array.isArray(data) ? data[0] : data;
+
+// 2. Helper: make text safe to show inside HTML
+const escape = s => String(s ?? '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;');
+
+// 3. Sort violations from most to least severe
+const order = { critical: 0, serious: 1, moderate: 2, minor: 3 };
+const violations = [...results.violations].sort((a, b) => order[a.impact] - order[b.impact]);
+
+// 4. Count violations by impact
+const counts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
+violations.forEach(v => counts[v.impact]++);
+
+// 5. Build one section per violation
+const sections = violations.length === 0
+  ? '<p>No violations found.</p>'
+  : violations.map(v => `
+<section>
+  <h3>${escape(v.help)}</h3>
+  <dl>
+    <dt>Rule</dt><dd><code>${escape(v.id)}</code></dd>
+    <dt>Impact</dt><dd>${escape(v.impact)}</dd>
+    <dt>Description</dt><dd>${escape(v.description)}</dd>
+    <dt>Tags</dt><dd>${v.tags.map(t => `<code>${escape(t)}</code>`).join(', ')}</dd>
+    <dt>Elements affected</dt><dd>${v.nodes.length}</dd>
+  </dl>
+  <p><a href="${escape(v.helpUrl)}">Learn more about ${escape(v.id)} at Deque University</a></p>
+  <h4>Failing elements</h4>
+  <ol>
+    ${v.nodes.map(n => `
+    <li>
+      <p>Selector: <code>${escape(n.target.join(' '))}</code></p>
+      <pre><code>${escape(n.html)}</code></pre>
+      <p>How to fix:</p>
+      <pre>${escape(n.failureSummary)}</pre>
+    </li>`).join('')}
+  </ol>
+</section>`).join('');
+
+// 6. Build the "needs review" list from incomplete results
+const review = results.incomplete.length === 0
+  ? '<p>Nothing needs review.</p>'
+  : `<ul>${results.incomplete.map(v =>
+      `<li><code>${escape(v.id)}</code>: ${escape(v.help)} (${v.nodes.length} elements)</li>`
+    ).join('')}</ul>`;
+
+// 7. Put the whole page together
+const env = results.testEnvironment || {};
+const report = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Full axe report</title>
+<style>
+  body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 60rem; margin: 2rem auto; padding: 0 1rem; color: #1a1a1a; }
+  section { border-top: 2px solid #ccc; padding-top: 1rem; margin-top: 2rem; }
+  dt { font-weight: bold; }
+  dd { margin: 0 0 0.5rem 0; }
+  pre { background: #f4f4f4; padding: 0.75rem; white-space: pre-wrap; }
+  table { border-collapse: collapse; }
+  th, td { border: 1px solid #999; padding: 0.25rem 0.75rem; text-align: left; }
+</style>
+</head>
+<body>
+<main>
+<h1>Full axe report</h1>
+
+<h2>Test details</h2>
+<dl>
+  <dt>Page</dt><dd><code>${escape(results.url)}</code></dd>
+  <dt>Tested</dt><dd>${escape(new Date(results.timestamp).toLocaleString('en-AU'))}</dd>
+  <dt>axe version</dt><dd>${escape(results.testEngine?.version || 'Not recorded')}</dd>
+  <dt>Window size</dt><dd>${escape(env.windowWidth)} × ${escape(env.windowHeight)}</dd>
+</dl>
+
+<h2>Summary</h2>
+<table>
+  <caption>Rule results</caption>
+  <tr><th scope="row">Violations</th><td>${results.violations.length}</td></tr>
+  <tr><th scope="row">Passes</th><td>${results.passes.length}</td></tr>
+  <tr><th scope="row">Needs review (incomplete)</th><td>${results.incomplete.length}</td></tr>
+  <tr><th scope="row">Not applicable</th><td>${results.inapplicable.length}</td></tr>
+</table>
+<p>Violations by impact: ${counts.critical} critical, ${counts.serious} serious, ${counts.moderate} moderate, ${counts.minor} minor.</p>
+
+<h2>Violations</h2>
+${sections}
+
+<h2>Needs review</h2>
+${review}
+</main>
+</body>
+</html>`;
+
+// 8. Save the report
+fs.writeFileSync(path.join(__dirname, 'report-full.html'), report);
+console.log('Full report saved to report-full.html');
+```
+
+In plain terms, the script:
+
+1. reads `results.json`
+2. sorts the violations from critical to minor, and counts them
+3. builds a section for each violation, with its details and failing elements
+4. builds a list of things that need a human to review
+5. wraps it all in an accessible HTML page and saves it as `report-full.html`.
+
+**To check it worked**, list the files in your folder (`ls` on Mac, `dir` on Windows). You should see `make-report.js`.
+
+Watch out for:
+
+- Make sure the file is called exactly `make-report.js`. If it shows up as `make-report.js.txt`, Notepad has added `.txt` to the end, so rename it.
+- Any HTML in the results has to be escaped, which is what the `escape` helper does. Without it, code like `<button></button>` would show up in the report as a real button, not as text.
+- The CLI saves a **list** of results, one for each page it tested, so the script reads the first item.
 
 #### 17. Run the report
 
