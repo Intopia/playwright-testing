@@ -35,15 +35,16 @@ This guide climbs a ladder in three rungs. You start by running axe-core by hand
   - [16. Write a reporting script](#16-write-a-reporting-script)
   - [17. Run the report](#17-run-the-report)
   - [18. Add a shortcut command](#18-add-a-shortcut-command)
+  - [19. Run the shortcut command](#19-run-the-shortcut-command)
 - [Rung 3: Running axe-core via a Playwright script](#rung-3-running-axe-core-via-a-playwright-script)
-  - [19. Write a basic check script](#19-write-a-basic-check-script)
-  - [20. Show only critical and serious](#20-show-only-critical-and-serious)
-  - [21. Sort the most severe issues to the top](#21-sort-the-most-severe-issues-to-the-top)
-  - [22. Re-run whenever the page changes](#22-re-run-whenever-the-page-changes)
-  - [23. Add check and watch shortcuts](#23-add-check-and-watch-shortcuts)
-  - [24. Write a simple HTML report](#24-write-a-simple-html-report)
-  - [25. Pass or fail](#25-pass-or-fail)
-  - [26. Fix the page and reach PASS](#26-fix-the-page-and-reach-pass)
+  - [20. Write a basic check script](#20-write-a-basic-check-script)
+  - [21. Show only critical and serious](#21-show-only-critical-and-serious)
+  - [22. Sort the most severe issues to the top](#22-sort-the-most-severe-issues-to-the-top)
+  - [23. Re-run whenever the page changes](#23-re-run-whenever-the-page-changes)
+  - [24. Add check and watch shortcuts](#24-add-check-and-watch-shortcuts)
+  - [25. Write a simple HTML report](#25-write-a-simple-html-report)
+  - [26. Pass or fail](#26-pass-or-fail)
+  - [27. Fix the page and reach PASS](#27-fix-the-page-and-reach-pass)
 
 ---
 
@@ -642,7 +643,7 @@ Watch out for:
 
 #### 18. Add a shortcut command
 
-Add a `report` script to `package.json`, so one short command runs axe *and* builds the report.
+Add a `report` script to `package.json`, so one short command runs axe, builds the report *and* opens it.
 
 Open `package.json` in your editor:
 
@@ -672,7 +673,7 @@ Replace it with the version for your computer, then save the file.
 
 ```json
   "scripts": {
-    "report": "axe \"file://$PWD/test-page.html\" --save results.json && node make-report.js"
+    "report": "axe \"file://$PWD/test-page.html\" --save results.json && node make-report.js && open -a \"Google Chrome\" report-full.html"
   },
 ```
 
@@ -680,29 +681,40 @@ Replace it with the version for your computer, then save the file.
 
 ```json
   "scripts": {
-    "report": "axe \"file:///%cd%/test-page.html\" --save results.json --chromedriver-path node_modules/chromedriver/lib/chromedriver/chromedriver.exe && node make-report.js"
+    "report": "axe \"file:///%cd%/test-page.html\" --save results.json --chromedriver-path node_modules/chromedriver/lib/chromedriver/chromedriver.exe && node make-report.js && start chrome \"%cd%\\report-full.html\""
   },
 ```
 
-In plain terms: "when I type `npm run report`, run axe on the test page and save the results, then build the report."
+In plain terms: "when I type `npm run report`, run axe on the test page and save the results, then build the report, then open it in Chrome."
 
 - `&&` means "then, if that worked, run this".
 - You don't need `npx` inside a script. npm already knows where to find the tools installed in your project.
-
-Now run it:
-
-```
-npm run report
-```
-
-You should see the 7 issues, then `Full report saved to report-full.html`. Open the report as in step 17 to check it's up to date.
 
 Watch out for:
 
 - JSON is very fussy. One missing comma or quote mark breaks the whole file.
 - Quote marks inside a JSON value need a backslash in front, like `\"`.
-- On Windows, the ChromeDriver path uses forward slashes (`/`) here, not backslashes. Inside JSON, a backslash has a special meaning, so each one would need to be doubled. Windows is happy with forward slashes, so it's simpler to use those.
+- A single backslash inside JSON is written as two, like `\\`. That's why the Windows version has `%cd%\\report-full.html`.
+- On Windows, the ChromeDriver path uses forward slashes (`/`), not backslashes. Windows is happy with forward slashes, and it avoids having to double every backslash.
 - When Chrome updates and the ChromeDriver error comes back, install the matching ChromeDriver again (see "Getting set up"). You won't need to change this script.
+
+#### 19. Run the shortcut command
+
+Type:
+
+```
+npm run report
+```
+
+In plain terms: "run everything in the `report` script, in order."
+
+You should see the 7 issues, then `Full report saved to report-full.html`, and then the report opens in Chrome.
+
+Watch out for:
+
+- Each run opens the report in a new Chrome tab. Close the old ones as you go, or they'll pile up.
+- If you see an error saying `Missing script: "report"`, the change to `package.json` didn't save, or the script name is spelled differently.
+- If npm complains about the JSON in `package.json`, check the commas and quote marks in step 18.
 
 ---
 
@@ -714,7 +726,7 @@ Control everything with your own code: what gets tested, what gets shown, and wh
 
 ### Steps
 
-#### 19. Write a basic check script
+#### 20. Write a basic check script
 
 Create `check.js`, a script that uses Playwright to open the page and the axe add-on to run axe, then prints how many violations it found.
 
@@ -723,15 +735,15 @@ Watch out for:
 - Save the file into your `axe-learning` folder. A "Cannot find module" error usually means it saved somewhere else.
 - The tab has to be opened inside a browser context (`browser.newContext()`). Opening it straight from the browser causes a "Please use browser.newContext()" error.
 
-#### 20. Show only critical and serious
+#### 21. Show only critical and serious
 
 Filter the violations to critical and serious, then print each one with its impact, rule, help text and failing HTML. The command line tool can't do this, which is why rung 3 is needed.
 
-#### 21. Sort the most severe issues to the top
+#### 22. Sort the most severe issues to the top
 
 Sort the list so critical issues appear before serious ones.
 
-#### 22. Re-run whenever the page changes
+#### 23. Re-run whenever the page changes
 
 Use Node's watch mode to re-run the script every time `test-page.html` is saved. This simulates a developer fixing problems as they work.
 
@@ -740,7 +752,7 @@ Watch out for:
 - Watch mode keeps running, so you won't get your Terminal prompt back. Press **Control + C** to stop it.
 - The screen clears before each run, so it can look like a new window.
 
-#### 23. Add check and watch shortcuts
+#### 24. Add check and watch shortcuts
 
 Add `check` and `watch` scripts to `package.json`.
 
@@ -748,7 +760,7 @@ Watch out for:
 
 - `npm run check` runs once and stops. `npm run watch` keeps running and re-checks on every save.
 
-#### 24. Write a simple HTML report
+#### 25. Write a simple HTML report
 
 Add code to `check.js` that saves the critical and serious issues as `report.html`.
 
@@ -756,7 +768,7 @@ Watch out for:
 
 - This report is separate from the full report in rung 2. It only shows critical and serious issues.
 
-#### 25. Pass or fail
+#### 26. Pass or fail
 
 End the script with a clear PASS or FAIL, and set an **exit code**. An exit code is a number every command reports when it finishes. 0 means success, and anything else means failure. This is how automated build tools decide whether to block code.
 
@@ -765,7 +777,7 @@ Watch out for:
 - npm adds a few error lines of its own when the script fails. That's not a bug, it's npm noticing the exit code.
 - The PASS or FAIL message only appears in Terminal, not in the report.
 
-#### 26. Fix the page and reach PASS
+#### 27. Fix the page and reach PASS
 
 Run watch mode, fix the six critical and serious problems one at a time, and watch the count drop to zero and PASS.
 
