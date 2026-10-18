@@ -134,7 +134,7 @@ open -a "Google Chrome" test-page.html
 **Windows:**
 
 ```bat
-start chrome test-page.html
+start chrome "%cd%\test-page.html"
 ```
 
 You should see a heading, a broken image icon, an empty text box, a tiny empty button and some faint grey text.
@@ -142,6 +142,7 @@ You should see a heading, a broken image icon, an empty text box, a tiny empty b
 Watch out for:
 
 - Opening the file without saying "Chrome" uses your default browser, which may be something else (Edge on Windows, Safari on Mac).
+- On Windows, Chrome needs the full path to the file, which is what `%cd%` fills in. With just the file name, Chrome treats it as a web address and shows "This site can't be reached".
 
 #### 3. Open the console
 
@@ -443,7 +444,7 @@ open -a "Google Chrome" results.json
 **Windows:**
 
 ```bat
-start chrome results.json
+start chrome "%cd%\results.json"
 ```
 
 Chrome shows the file as one long block of text. Tick the **Pretty-print** checkbox at the top of the page to lay it out neatly, with each item on its own line.
@@ -624,7 +625,7 @@ open -a "Google Chrome" report-full.html
 
 ```bat
 node make-report.js
-start chrome report-full.html
+start chrome "%cd%\report-full.html"
 ```
 
 Type each line separately, pressing Enter after each one.
@@ -635,7 +636,9 @@ After the first line, you should see `Full report saved to report-full.html`. Th
 
 Watch out for:
 
+- If you see "ENOENT: no such file or directory ... results.json", the results file doesn't exist yet. Run step 14 first, and check it says where the file was saved.
 - The report only shows what's in the latest `results.json`. If you've changed the page, run step 14 again first.
+- On Windows, if Chrome shows "This site can't be reached", check you included the `"%cd%\..."` part when opening the report.
 
 #### 18. Add a shortcut command
 
